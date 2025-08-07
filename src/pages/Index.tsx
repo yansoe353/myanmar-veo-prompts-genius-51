@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginDialog } from "@/components/auth/LoginDialog";
+import { SignupDialog } from "@/components/auth/SignupDialog";
+import { UserMenu } from "@/components/auth/UserMenu";
+import { ProfileDialog } from "@/components/auth/ProfileDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +14,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { generatePrompt } from "@/services/geminiService";
 import { toast } from "sonner";
 import { Copy, Video, Sparkles, MessageSquare, HelpCircle, Zap, Users, MapPin, Mic, Play } from "lucide-react";
+import { LogIn, UserPlus } from "lucide-react";
 import MyanmarTranslateInput from "@/components/MyanmarTranslateInput";
 
 const Index = () => {
+  const { user, canUsePrompts, incrementPromptUsage } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showVeoDialog, setShowVeoDialog] = useState(false);
   const [formData, setFormData] = useState({
     location: "",
@@ -32,6 +42,17 @@ const Index = () => {
   };
 
   const handleGeneratePrompt = async () => {
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
+
+    if (!canUsePrompts()) {
+      toast.error("You've reached your prompt limit. Please upgrade your plan.");
+      setShowProfileDialog(true);
+      return;
+    }
+
     if (!formData.location || !formData.character1 || !formData.dialogue1) {
       toast.error("Please fill in the required fields: Location, Character 1, and Dialogue 1");
       return;
@@ -41,6 +62,7 @@ const Index = () => {
     try {
       const prompt = await generatePrompt(formData);
       setGeneratedPrompt(prompt);
+      incrementPromptUsage();
       toast.success("Prompt generated successfully!");
     } catch (error) {
       console.error("Error generating prompt:", error);
@@ -126,6 +148,17 @@ const Index = () => {
   };
 
   const createManualPrompt = () => {
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
+
+    if (!canUsePrompts()) {
+      toast.error("You've reached your prompt limit. Please upgrade your plan.");
+      setShowProfileDialog(true);
+      return;
+    }
+
     let prompt = `✅ At ${formData.location}\n\n`;
     
     if (formData.character2) {
@@ -144,6 +177,7 @@ const Index = () => {
     prompt += `✅ Note that output audio must be in burmese language.`;
     
     setGeneratedPrompt(prompt);
+    incrementPromptUsage();
     toast.success("Manual prompt created!");
   };
 
@@ -160,6 +194,33 @@ const Index = () => {
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Header */}
           <div className="text-center mb-12">
+            {/* Auth buttons */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              {user ? (
+                <UserMenu onOpenProfile={() => setShowProfileDialog(true)} />
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowLoginDialog(true)}
+                    className="border-border/50 hover:border-neon-green/50"
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowSignupDialog(true)}
+                    className="bg-gradient-to-r from-neon-green via-neon-cyan to-neon-purple hover:from-neon-green/80 hover:via-neon-cyan/80 hover:to-neon-purple/80 text-black font-bold"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Up
+                  </Button>
+                </>
+              )}
+            </div>
+
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="relative">
                 <Video className="h-10 w-10 text-neon-green drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
@@ -527,6 +588,29 @@ const Index = () => {
           </Card>
         </div>
 
+        {/* Auth Dialogs */}
+        <LoginDialog
+          open={showLoginDialog}
+          onOpenChange={setShowLoginDialog}
+          onSwitchToSignup={() => {
+            setShowLoginDialog(false);
+            setShowSignupDialog(true);
+          }}
+        />
+        
+        <SignupDialog
+          open={showSignupDialog}
+          onOpenChange={setShowSignupDialog}
+          onSwitchToLogin={() => {
+            setShowSignupDialog(false);
+            setShowLoginDialog(true);
+          }}
+        />
+        
+        <ProfileDialog
+          open={showProfileDialog}
+          onOpenChange={setShowProfileDialog}
+        />
         {/* Instructions */}
         <Card className="mt-8 shadow-lg border-border/20 bg-gradient-to-r from-card via-card to-muted/50 backdrop-blur-sm">
           <CardHeader>
