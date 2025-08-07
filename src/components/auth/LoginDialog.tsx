@@ -88,9 +88,8 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
           </div>
 
           <div className="bg-muted/50 p-3 rounded-lg text-sm">
-            <p className="font-medium mb-1">Demo Account:</p>
-            <p>Email: demo@example.com</p>
-            <p>Password: demo123</p>
+            <p className="font-medium mb-1">Create an account or sign in to start generating prompts!</p>
+            <p className="text-xs text-muted-foreground">Your account will be securely stored with Supabase.</p>
           </div>
           
           <Button

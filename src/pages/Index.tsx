@@ -177,7 +177,11 @@ const Index = () => {
     prompt += `✅ Note that output audio must be in burmese language.`;
     
     setGeneratedPrompt(prompt);
-    incrementPromptUsage();
+    incrementPromptUsage().then(() => {
+      // Usage incremented successfully
+    }).catch((error) => {
+      console.error('Failed to increment usage:', error);
+    });
     toast.success("Manual prompt created!");
   };
 
