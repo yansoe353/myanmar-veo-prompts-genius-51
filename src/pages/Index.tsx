@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { generatePrompt } from "@/services/geminiService";
 import { toast } from "sonner";
-import { Copy, Video, Sparkles, MessageSquare, HelpCircle, Zap, Users, MapPin, Mic } from "lucide-react";
+import { Copy, Video, Sparkles, MessageSquare, HelpCircle, Zap, Users, MapPin, Mic, Play } from "lucide-react";
 import MyanmarTranslateInput from "@/components/MyanmarTranslateInput";
 
 const Index = () => {
   const [loading, setLoading] = useState(false);
+  const [showVeoDialog, setShowVeoDialog] = useState(false);
   const [formData, setFormData] = useState({
     location: "",
     character1: "",
@@ -82,6 +84,45 @@ const Index = () => {
       console.error('Copy to clipboard failed:', error);
       toast.error("Failed to copy prompt. Please select and copy manually.");
     }
+  };
+
+  const handleVeo3RealTime = async () => {
+    if (!generatedPrompt) {
+      toast.error("Please generate a prompt first");
+      return;
+    }
+
+    // Copy the prompt automatically
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(generatedPrompt);
+      } else {
+        // Fallback for non-secure contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedPrompt;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+      toast.success("Prompt copied! Opening Veo 3 Real-Time...");
+    } catch (error) {
+      console.error('Copy failed:', error);
+      toast.warning("Opening Veo 3 Real-Time (copy manually if needed)");
+    }
+
+    // Open the Veo 3 Real-Time dialog
+    setShowVeoDialog(true);
   };
 
   const createManualPrompt = () => {
@@ -449,6 +490,22 @@ const Index = () => {
                         <p>Gemini Pro တွင် Veo 3 ဖြင့် ဗီဒီယို ဖန်တီးပါ</p>
                       </TooltipContent>
                     </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          onClick={handleVeo3RealTime}
+                          disabled={!generatedPrompt}
+                          className="flex-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 hover:from-red-400 hover:via-orange-400 hover:to-yellow-400 text-black font-bold shadow-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300"
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Generate with Veo 3 Real-Time</span>
+                          <span className="sm:hidden">Veo 3 RT</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Veo 3 Real-Time ဖြင့် တိုက်ရိုက် ဗီဒီယို ဖန်တီးပါ</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               ) : (
@@ -493,6 +550,30 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Veo 3 Real-Time Dialog */}
+        <Dialog open={showVeoDialog} onOpenChange={setShowVeoDialog}>
+          <DialogContent className="max-w-6xl w-full h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+                <Play className="h-6 w-6 text-red-500" />
+                Veo 3 Real-Time Generator
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 p-6 pt-2">
+              <div className="w-full h-full rounded-lg overflow-hidden border border-border/30 bg-background/50">
+                <script
+                  type="module"
+                  src="https://gradio.s3-us-west-2.amazonaws.com/5.34.2/gradio.js"
+                ></script>
+                <gradio-app 
+                  src="https://heartsync-veo3-realtime.hf.space"
+                  className="w-full h-full"
+                ></gradio-app>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
         </div>
       </div>
     </TooltipProvider>
