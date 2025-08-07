@@ -50,17 +50,37 @@ const Index = () => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(generatedPrompt);
-      toast.success("Prompt copied to clipboard!");
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(generatedPrompt);
+        toast.success("Prompt copied to clipboard!");
+      } else {
+        // Fallback for non-secure contexts or older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = generatedPrompt;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            toast.success("Prompt copied to clipboard!");
+          } else {
+            throw new Error('Copy command failed');
+          }
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+          toast.error("Failed to copy prompt. Please select and copy manually.");
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
     } catch (error) {
-      // Fallback for browsers that don't support clipboard API
-      const textArea = document.createElement('textarea');
-      textArea.value = generatedPrompt;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      toast.success("Prompt copied to clipboard!");
+      console.error('Copy to clipboard failed:', error);
+      toast.error("Failed to copy prompt. Please select and copy manually.");
     }
   };
 
