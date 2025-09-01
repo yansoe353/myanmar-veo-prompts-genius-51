@@ -219,8 +219,6 @@ export const Veo3BusinessDialog: React.FC<Veo3BusinessDialogProps> = ({
                     <SelectContent>
                       <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
                       <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                      <SelectItem value="1:1">1:1 (Square)</SelectItem>
-                      <SelectItem value="4:3">4:3 (Standard)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
