@@ -212,6 +212,9 @@ export const Veo3BusinessDialog: React.FC<Veo3BusinessDialogProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="aspectRatio">Aspect Ratio</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    16:9 supports 1080P HD generation, 9:16 optimized for mobile
+                  </p>
                   <Select value={aspectRatio} onValueChange={setAspectRatio}>
                     <SelectTrigger>
                       <SelectValue />
