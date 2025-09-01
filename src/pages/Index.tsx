@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Copy, Video, Sparkles, MessageSquare, HelpCircle, Zap, Users, MapPin, Mic, Play } from "lucide-react";
 import { LogIn, UserPlus } from "lucide-react";
 import MyanmarTranslateInput from "@/components/MyanmarTranslateInput";
+import { Veo3BusinessDialog } from "@/components/Veo3BusinessDialog";
 
 const Index = () => {
   const { user, canUsePrompts, incrementPromptUsage } = useAuth();
@@ -24,6 +25,7 @@ const Index = () => {
   const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showVeoDialog, setShowVeoDialog] = useState(false);
+  const [showVeo3BusinessDialog, setShowVeo3BusinessDialog] = useState(false);
   const [formData, setFormData] = useState({
     location: "",
     character1: "",
@@ -571,6 +573,21 @@ const Index = () => {
                         <p>Veo 3 Real-Time ဖြင့် တိုက်ရိုက် ဗီဒီယို ဖန်တီးပါ</p>
                       </TooltipContent>
                     </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          onClick={() => setShowVeo3BusinessDialog(true)}
+                          className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-400 hover:via-purple-400 hover:to-pink-400 text-white font-bold shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300"
+                        >
+                          <Zap className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Veo 3 Business</span>
+                          <span className="sm:hidden">Veo 3 Biz</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Professional Veo 3 video generation with KIE API</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               ) : (
@@ -615,6 +632,13 @@ const Index = () => {
           open={showProfileDialog}
           onOpenChange={setShowProfileDialog}
         />
+        
+        <Veo3BusinessDialog
+          open={showVeo3BusinessDialog}
+          onOpenChange={setShowVeo3BusinessDialog}
+          initialPrompt={generatedPrompt}
+        />
+
         {/* Instructions */}
         <Card className="mt-8 shadow-lg border-border/20 bg-gradient-to-r from-card via-card to-muted/50 backdrop-blur-sm">
           <CardHeader>
